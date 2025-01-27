@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@types/node": "^22.10.7",
+    "agent-twitter-client": "^0.0.18",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "puppeteer": "^24.1.1",
+    "twitter-api-v2": "^1.19.0"
+  }
+}
