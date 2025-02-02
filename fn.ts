@@ -2,31 +2,31 @@ import { PathLike } from "fs";
 import fs from "fs/promises";
 import path from "path";
 
-// async function importJsonFiles(folderPath) {
-// 	try {
-// 		// Read all files in the directory
-// 		const files = await fs.readdir(folderPath);
+export async function importJsonFiles(folderPath: PathLike) {
+	try {
+		// Read all files in the directory
+		const files = await fs.readdir(folderPath);
 
-// 		// Filter for .json files and read them
-// 		const jsonFiles = await Promise.all(
-// 			files
-// 				.filter((file) => path.extname(file).toLowerCase() === ".json")
-// 				.map(async (file) => {
-// 					const filePath = path.join(folderPath, file);
-// 					const content = await fs.readFile(filePath, "utf8");
-// 					return {
-// 						fileName: file,
-// 						data: JSON.parse(content),
-// 					};
-// 				})
-// 		);
+		// Filter for .json files and read them
+		const jsonFiles = await Promise.all(
+			files
+				.filter((file) => path.extname(file).toLowerCase() === ".json")
+				.map(async (file) => {
+					const filePath = path.join(folderPath.toString(), file);
+					const content = await fs.readFile(filePath, "utf8");
+					return {
+						fileName: file,
+						data: JSON.parse(content),
+					};
+				})
+		);
 
-// 		return jsonFiles;
-// 	} catch (error) {
-// 		console.error("Error importing JSON files:", error);
-// 		throw error;
-// 	}
-// }
+		return jsonFiles;
+	} catch (error) {
+		console.error("Error importing JSON files:", error);
+		throw error;
+	}
+}
 // function importJsonFilesSync(folderPath) {
 // 	try {
 // 		const files = fs.readdirSync(folderPath);

@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import { importJsonFilesByPattern, importNestedJsonFiles } from "./fn";
+import { importJsonFiles, importJsonFilesByPattern, importNestedJsonFiles } from "./fn";
 async function main() {
 	try {
 		const folderPath = path.join("./data");
@@ -22,24 +22,29 @@ async function main() {
 }
 async function app() {
 	// Read and parse the JSON files
-	const data1 = JSON.parse(
-		fs.readFileSync("./data/pump-fun-data-1.json", "utf8")
+	const tokens = JSON.parse(
+		fs.readFileSync("./data/trades/tokens/merged.json", "utf8")
 	);
-	let data: any=[];
-	for (let i = 5; i < 14; i++) {
-		const up = JSON.parse(
-			fs.readFileSync(`./data/pump-fun-data-${i}.json`, "utf8")
-		);
-		data=data.concat(up)
-	}
+	console.log(tokens.length)
+	const tokenTrades=importJsonFiles('./data/trades/')
+	console.log((await tokenTrades).length)
+	// let data: any=[];
+	// for (let i = 5; i < 14; i++) {
+	// 	const up = JSON.parse(
+	// 		fs.readFileSync(`./data/pump-fun-data-${i}.json`, "utf8")
+	// 	);
+	// 	data=data.concat(up)
+	// }
 
-	// Write the merged data to a new JSON file
-	fs.writeFileSync("./data/remain.json", JSON.stringify(data, null, 2));
+	// // Write the merged data to a new JSON file
+	// fs.writeFileSync("./data/remain.json", JSON.stringify(data, null, 2));
 
-	console.log("Merged JSON saved to merged.json");
-	const res = JSON.parse(fs.readFileSync("./data/remain.json", "utf8"));
-	console.log(res.length);
+	// console.log("Merged JSON saved to merged.json");
+	// const res = JSON.parse(fs.readFileSync("./data/remain.json", "utf8"));
+	// console.log(res.length);
 }
+
+
 if (require.main === module) {
 	//main();
 	app();
