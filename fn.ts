@@ -129,3 +129,117 @@ export async function importJsonFilesByPattern(
 		throw error;
 	}
 }
+
+// Type for configuration options
+interface FetchAndSaveOptions {
+  pretty?: boolean;  // Whether to prettify the JSON output
+  encoding?: BufferEncoding;  // File encoding
+  appendMode?: boolean;  // Whether to append to existing file
+}
+
+/**
+ * Fetches data from a URL and saves it to a JSON file
+ * @param url The URL to fetch data from
+ * @param filename The name of the file to save the data to
+ * @param options Configuration options for saving
+ */
+export async function fetchAndSaveJson(
+  url: string,
+  filename: string,
+  options: FetchAndSaveOptions = {}
+): Promise<void> {
+  const {
+    pretty = true,
+    encoding = 'utf-8',
+    appendMode = false
+  } = options;
+
+  try {
+    // Fetch the data
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Parse the JSON
+    const data = await response.json();
+
+    // Ensure the directory exists
+    const dir = path.dirname(filename);
+    await fs.mkdir(dir, { recursive: true });
+
+    if (appendMode) {
+      let existingData: any[] = [];
+      try {
+        const fileContent = await fs.readFile(filename, { encoding });
+        existingData = JSON.parse(fileContent.toString());
+        if (!Array.isArray(existingData)) {
+          existingData = [existingData];
+        }
+      } catch (error) {
+        // File doesn't exist or is invalid, start with empty array
+      }
+
+      // Append new data
+      existingData.push(data);
+      await fs.writeFile(
+        filename,
+        JSON.stringify(existingData, null, pretty ? 2 : 0),
+        { encoding }
+      );
+    } else {
+      // Write new file
+      await fs.writeFile(
+        filename,
+        JSON.stringify(data, null, pretty ? 2 : 0),
+        { encoding }
+      );
+    }
+
+    console.log(`Data successfully saved to ${filename}`);
+
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch and save JSON: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Saves data directly to a JSON file
+ * @param data The data to save
+ * @param filename The name of the file to save the data to
+ * @param options Configuration options for saving
+ */
+export async function saveToJson(
+  data: unknown,
+  filename: string,
+  options: Omit<FetchAndSaveOptions, 'appendMode'> = {}
+): Promise<void> {
+  const {
+    pretty = true,
+    encoding = 'utf-8'
+  } = options;
+
+  try {
+    // Ensure the directory exists
+    const dir = path.dirname(filename);
+    await fs.mkdir(dir, { recursive: true });
+
+    // Write the file
+    await fs.writeFile(
+      filename,
+      JSON.stringify(data, null, pretty ? 2 : 0),
+      { encoding }
+    );
+
+    console.log(`Data successfully saved to ${filename}`);
+
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to save JSON: ${error.message}`);
+    }
+    throw error;
+  }
+}
