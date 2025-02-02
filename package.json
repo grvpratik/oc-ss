@@ -6,6 +6,7 @@
     "dotenv": "^16.4.7",
     "google-trends-api": "^4.9.2",
     "puppeteer": "^24.1.1",
+    "ts-node": "^10.9.2",
     "twitter-api-v2": "^1.19.0"
   },
   "devDependencies": {
