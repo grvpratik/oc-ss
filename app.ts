@@ -16,7 +16,7 @@ async function getTransactionList(walletAddress: string, limit: number = 10) {
 	);
 
 	try {
-		// Get signatures for address
+		console.log((await rpc.getSignaturesForAddress(address(walletAddress)).send()).length);		// Get signatures for address
 		const signatures = await rpc
 			.getSignaturesForAddress(address(walletAddress), {
               
@@ -34,9 +34,8 @@ async function getTransactionList(walletAddress: string, limit: number = 10) {
 						maxSupportedTransactionVersion: 0,
 					})
 					.send();
-console.log(tx)
-console.dir({})
-// console.log(sig)
+
+
 				return {
 					signature: sig.signature,
 					timestamp: sig.blockTime,
@@ -59,7 +58,7 @@ console.dir({})
 async function main() {
 	try {
 		// Example wallet address
-		const address = "AxN5u5AwbTiBnayULt7Nug8gXzCJNwWSGT2ZNmE4A78Q";
+		const address = "8qMN8iwTx5rk6M3NtkTbmzwcVnAyocyHo29hQbwtVgWt";
 
 		const txList = await getTransactionList(address, 2);
 

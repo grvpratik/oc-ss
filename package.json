@@ -1,12 +1,14 @@
 {
   "dependencies": {
     "@solana/web3.js": "^2.0.0",
-    "@types/node": "^22.10.7",
     "agent-twitter-client": "^0.0.18",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "google-trends-api": "^4.9.2",
     "puppeteer": "^24.1.1",
     "twitter-api-v2": "^1.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0"
   }
 }
