@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@solana/spl-token": "^0.4.12",
     "@solana/web3.js": "^2.0.0",
     "agent-twitter-client": "^0.0.18",
     "axios": "^1.7.9",

@@ -127,7 +127,7 @@ async function Betalist() {
 					imageUrl: item.querySelector("img")?.src || null,
 				};
 			});
-		}); // Replace with your div's ID
+		}); 
 
 		console.log(JSON.stringify(products, null, 2));
 		return products;
