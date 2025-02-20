@@ -102,6 +102,16 @@
   resolved "https://registry.npmjs.org/@sinclair/typebox/-/typebox-0.32.35.tgz"
   integrity sha512-Ul3YyOTU++to8cgNkttakC0dWvpERr6RYoHO2W47DLbFvrwBDJUY31B1sImH6JZSYc4Kt4PyHtoPNu+vL2r2dA==
 
+"@solana-program/memo@^0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@solana-program/memo/-/memo-0.6.1.tgz#2949e4196ba533965216b226164d2ec08ca2410a"
+  integrity sha512-m1Mt/10uADf5WeqTQequI5GqeNsEw3xWzFz1KR018U+olUWXCKoVE4TsjF0+C0lxW9kQ+smLXvCDyqTHW/Lf6A==
+
+"@solana-program/system@^0.6.2":
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/@solana-program/system/-/system-0.6.2.tgz#7b5d5097a03cb544da9e7df49fe7519594cdd294"
+  integrity sha512-q0ZnylK+LISjuP2jH5GWV9IJPtpzQctj5KQwij9XCDRSGkcFr2fpqptNnVupTLQiNL6Q4c1OZuG8WBmyFXVXZw==
+
 "@solana/accounts@2.0.0":
   version "2.0.0"
   resolved "https://registry.npmjs.org/@solana/accounts/-/accounts-2.0.0.tgz"
