@@ -2,10 +2,6 @@ import "dotenv/config";
 
 
 
-// (async () => {
-
-// })();
-
 import { createSolanaRpc, type Address, address } from "@solana/web3.js";
 
 async function getTransactionList(walletAddress: string, limit: number = 10) {
@@ -56,24 +52,26 @@ async function getTransactionList(walletAddress: string, limit: number = 10) {
 
 // Example usage
 async function main() {
-	try {
-		// Example wallet address
-		const address = "8qMN8iwTx5rk6M3NtkTbmzwcVnAyocyHo29hQbwtVgWt";
+	// try {
+	// 	// Example wallet address
+	// 	const address = "8qMN8iwTx5rk6M3NtkTbmzwcVnAyocyHo29hQbwtVgWt";
 
-		const txList = await getTransactionList(address, 2);
+	// 	const txList = await getTransactionList(address, 2);
 
-		// Process transaction list
-		txList.forEach((tx) => {
-			console.log("Signature:", tx.signature);
-			console.log(
-				"Timestamp:",
-				tx.timestamp ? new Date(Number(tx.timestamp) * 1000).toISOString() : "Unknown"
-			);
-			console.log("Status:", tx.error ? "Failed" : "Success");
-			console.log("-----------------");
-		});
-	} catch (error) {
-		console.error("Failed to fetch transactions:", error);
-	}
+	// 	// Process transaction list
+	// 	txList.forEach((tx) => {
+	// 		console.log("Signature:", tx.signature);
+	// 		console.log(
+	// 			"Timestamp:",
+	// 			tx.timestamp ? new Date(Number(tx.timestamp) * 1000).toISOString() : "Unknown"
+	// 		);
+	// 		console.log("Status:", tx.error ? "Failed" : "Success");
+	// 		console.log("-----------------");
+	// 	});
+	// } catch (error) {
+	// 	console.error("Failed to fetch transactions:", error);
+	// }
+
+
 }
 main();

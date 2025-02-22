@@ -32,6 +32,127 @@ interface InstructionDetail {
 	data: any;
 }
 import "dotenv/config";
+
+import bs58 from "bs58";
+import { json } from "stream/consumers";
+import { analyzeSolanaTransaction, extractTransactionDetails, formatTransactionAnalysis } from "./chainfun";
+
+interface DecodedPumpFunData {
+	instructionType: string;
+	tokenName?: string;
+	tokenAmount?: number;
+	tokenMint?: string;
+	sender?: string;
+	recipient?: string;
+}
+
+/**
+ * Decode PumpFun transaction data
+ */
+function decodePumpFunInstruction(instruction: {
+	accounts: string[];
+	data: string;
+	programId: string;
+}): DecodedPumpFunData {
+	try {
+		// Decode base58 instruction data
+		const decodedData = bs58.decode(instruction.data);
+
+		// First bytes typically represent instruction type
+		const firstByte = decodedData[0];
+
+		// Map accounts to meaningful names
+		const userWallet = instruction.accounts[0]; // Often the first account is user wallet
+		const tokenMint = instruction.accounts[1]; // Often second account is token mint
+		const pumpfunEscrow = instruction.accounts[2]; // Often PumpFun protocol account
+
+		// Attempt to determine instruction type based on first byte and accounts pattern
+		let instructionType = "Unknown PumpFun Operation";
+
+		if (firstByte === 0 || firstByte === 1) {
+			instructionType = "Buy Token";
+		} else if (firstByte === 2 || firstByte === 3) {
+			instructionType = "Sell Token";
+		} else if (firstByte === 4) {
+			instructionType = "Create Token";
+		} else if (firstByte === 5) {
+			instructionType = "Claim Rewards";
+		}
+
+		// Extract any token name if available (typically in later bytes)
+		let tokenName = "";
+		if (decodedData.length > 8) {
+			// Skip instruction discriminator (typically 8 bytes)
+			// This is a simplification - actual format depends on PumpFun's specific protocol
+			const possibleTextBytes = decodedData.slice(8);
+			try {
+				// Attempt to decode any text data
+				tokenName = new TextDecoder()
+					.decode(
+						possibleTextBytes.filter((b: any) => b >= 32 && b < 127) // Filter for printable ASCII
+					)
+					.trim();
+			} catch (e) {
+				// Text decoding failed
+			}
+		}
+
+		return {
+			instructionType,
+			tokenName: tokenName || undefined,
+			tokenMint: tokenMint,
+			sender: userWallet,
+			// Add more details as needed
+		};
+	} catch (error) {
+		console.error("Error decoding PumpFun instruction:", error);
+		return {
+			instructionType: "Failed to decode",
+		};
+	}
+}
+
+/**
+ * Function to get human-readable account roles
+ */
+function getAccountRoles(
+	accounts: string[],
+	programId: string
+): Record<string, string> {
+	// Known PumpFun accounts
+	const KNOWN_ACCOUNTS: Record<string, string> = {
+		"3TDrQAJgnUmWP2SyGJiJ1tiQkri28gvHkjDVSUQcpump": "PumpFun Protocol Account",
+		"11111111111111111111111111111111": "System Program",
+		TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: "Token Program",
+		SysvarRent111111111111111111111111111111111: "Rent Sysvar",
+	};
+
+	const accountRoles: Record<string, string> = {};
+
+	accounts.forEach((account, index) => {
+		if (KNOWN_ACCOUNTS[account]) {
+			accountRoles[account] = KNOWN_ACCOUNTS[account];
+		} else if (account === programId) {
+			accountRoles[account] = "PumpFun Program";
+		} else if (index === 0) {
+			accountRoles[account] = "User Wallet (likely)";
+		} else if (index === 1) {
+			accountRoles[account] = "Token Mint (likely)";
+		} else if (index <= 3) {
+			accountRoles[account] = "Protocol Account / Token Account";
+		} else {
+			accountRoles[account] = `Account ${index}`;
+		}
+	});
+
+	return accountRoles;
+}
+const DEX_PROGRAM_IDS = {
+	JUPITER: "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB",
+	RAYDIUM: "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+	ORCA: "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
+	PUMPFUN: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+};
 export async function getWalletTransactions(
 	walletAddress: string,
 	limit: number = 10
@@ -53,7 +174,9 @@ export async function getWalletTransactions(
 		if (!signaturesResponse || signaturesResponse.length === 0) {
 			return [];
 		}
-
+		console.log(signaturesResponse, "sigres");
+		const blockTime = signaturesResponse.map((sig) => sig.blockTime);
+		const slot = signaturesResponse.map((sig) => sig.slot);
 		// Process each transaction
 		const transactions: TransactionDetails[] = await Promise.all(
 			signaturesResponse.map(async (sig) => {
@@ -79,8 +202,30 @@ export async function getWalletTransactions(
 					}
 
 					const tx = txResponse;
-                    console.log(tx.meta?.postTokenBalances)
-                    console.log(tx.meta?.preTokenBalances)
+					const innerTx = tx.meta && tx.meta.innerInstructions;
+					const postTokenBalances = tx.meta && tx.meta.postTokenBalances;
+					const preTokenBalances = tx.meta && tx.meta.preTokenBalances;
+					const txInstruction = tx.transaction.message.instructions.forEach(
+						(instruction: any) => {}
+					);
+					const signature=tx.transaction.signatures.map((instruction: any) => {})
+					const parsed=analyzeSolanaTransaction(tx)
+
+console.log(formatTransactionAnalysis(parsed),"PARSEFD")					// console.log(
+					// 	"TX",
+					// 	JSON.stringify(
+					// 		tx,
+					// 		(key, value) => {
+					// 			if (typeof value === "bigint") {
+					// 				return value.toString();
+					// 			}
+					// 			return value;
+					// 		},
+					// 		2
+					// 	)
+					// );
+					// console.log(tx.meta?.postTokenBalances)
+					// console.log(tx.meta?.preTokenBalances)
 					// if (tx.meta && tx.meta.postBalances) {
 					// 	const solChanges = tx.meta.preBalances
 					// 		.map((pre, index) => {
@@ -136,6 +281,17 @@ export async function getWalletTransactions(
 								instruction.programId ===
 								"6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
 							) {
+								//console.log(instruction,"PF");
+								// const instructionx = tx.transaction.message.instructions[0];
+								// if ('accounts' in instructionx) {
+								// 	console.log(
+								// 		getAccountRoles(
+								// 			Array.from(instruction.accounts).map(String),
+								// 			"6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
+								// 		),
+								// 		"roles"
+								// 	);
+								// }
 								type = "pumpfun";
 							}
 
@@ -180,10 +336,10 @@ export async function getWalletTransactions(
 
 (async () => {
 	const transactions = await getWalletTransactions(
-		"2bxSMcmZTstu4Hp3WektjfZ4Lg9trgGMpjCvLwMqYtre",
-		3
+		"5XwHj9QDqJbZGBiHfJRhoY1qkvqtpERFMPkNDmJNqdmG",
+		1
 	);
-	// console.log(transactions)
+	// console.log(transactions.map((tx) => tx.instructions));
 	// console.log(
 	// 	JSON.stringify(
 	// 		transactions,
@@ -198,3 +354,13 @@ export async function getWalletTransactions(
 	// 	)
 	// );
 })();
+//it will show transactions
+//transaction can be classified into different types swap(ie pumpfun raydium) and transfer like sol or spl
+//for swap we can use the program id to identify the swap program
+//for transfer we can use the program id to identify the transfer program
+//for pumpfun we can use the program id to identify the pumpfun program
+
+//transaction can contain
+//innerinstructiona ->instruction->parsed ->info and type
+//inner inst->inst->program and program id
+//inner instruction ->accounts which contain program id

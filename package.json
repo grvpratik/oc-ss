@@ -5,6 +5,7 @@
     "@solana/web3.js": "^2.0.0",
     "agent-twitter-client": "^0.0.18",
     "axios": "^1.7.9",
+    "bs58": "^6.0.0",
     "dotenv": "^16.4.7",
     "google-trends-api": "^4.9.2",
     "puppeteer": "^24.1.1",
