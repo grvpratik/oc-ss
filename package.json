@@ -2,7 +2,9 @@
   "dependencies": {
     "@solana-program/memo": "^0.6.1",
     "@solana-program/system": "^0.6.2",
+    "@solana/spl-token": "^0.4.12",
     "@solana/web3.js": "^2.0.0",
+    "@types/ws": "^8.5.14",
     "agent-twitter-client": "^0.0.18",
     "axios": "^1.7.9",
     "bs58": "^6.0.0",
@@ -10,7 +12,8 @@
     "google-trends-api": "^4.9.2",
     "puppeteer": "^24.1.1",
     "ts-node": "^10.9.2",
-    "twitter-api-v2": "^1.19.0"
+    "twitter-api-v2": "^1.19.0",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.0"

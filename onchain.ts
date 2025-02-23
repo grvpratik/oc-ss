@@ -6,6 +6,7 @@ import {
 	Lamports,
 	lamports,
 	UnixTimestamp,
+	Signature,
 } from "@solana/web3.js";
 import {
 	identifySystemInstruction,
@@ -35,7 +36,13 @@ import "dotenv/config";
 
 import bs58 from "bs58";
 import { json } from "stream/consumers";
-import { analyzeSolanaTransaction, extractTransactionDetails, formatTransactionAnalysis } from "./chainfun";
+import {
+	analyzeSolanaTransaction,
+	extractTransactionDetails,
+	formatTransactionAnalysis,
+	parseAndPrintTx,
+	parseSolanaTransaction,
+} from "./chainfun";
 
 interface DecodedPumpFunData {
 	instructionType: string;
@@ -57,7 +64,7 @@ function decodePumpFunInstruction(instruction: {
 	try {
 		// Decode base58 instruction data
 		const decodedData = bs58.decode(instruction.data);
-
+console.log(decodedData)
 		// First bytes typically represent instruction type
 		const firstByte = decodedData[0];
 
@@ -96,6 +103,7 @@ function decodePumpFunInstruction(instruction: {
 				// Text decoding failed
 			}
 		}
+		console.log(instructionType, tokenName, tokenMint, userWallet);
 
 		return {
 			instructionType,
@@ -174,21 +182,27 @@ export async function getWalletTransactions(
 		if (!signaturesResponse || signaturesResponse.length === 0) {
 			return [];
 		}
-		console.log(signaturesResponse, "sigres");
+		// console.log(signaturesResponse, "sigres");
 		const blockTime = signaturesResponse.map((sig) => sig.blockTime);
 		const slot = signaturesResponse.map((sig) => sig.slot);
 		// Process each transaction
+		// console.log(signaturesResponse);
+
 		const transactions: TransactionDetails[] = await Promise.all(
 			signaturesResponse.map(async (sig) => {
 				try {
 					// Fetch transaction details using JSON parsed format
 					const txResponse = await rpc
-						.getTransaction(sig.signature, {
-							maxSupportedTransactionVersion: 0,
-							encoding: "jsonParsed",
-						})
+						.getTransaction(
+							sig.signature ||
+								"iRP2wprvsFBLTANEtdkxS4w8PrbbkRQTSgNuKvBudhkuhhNZ1z2fBhbx4UYBHAZSHD2x9wma7XARomXtMXmVUgB" as Signature,
+							{
+								maxSupportedTransactionVersion: 0,
+								encoding: "jsonParsed",
+							}
+						)
 						.send();
-
+					// console.log(sig, "sig");
 					if (!txResponse) {
 						console.warn(`Transaction ${sig.signature} not found`);
 						return {
@@ -202,28 +216,49 @@ export async function getWalletTransactions(
 					}
 
 					const tx = txResponse;
+
+					// let instructions = tx.transaction.message.instructions;
+					// const res = instructions.map((ix) => decodePumpFunInstruction(ix.));
+					decodePumpFunInstruction({
+						accounts: [],
+						data: "5jRcjdixRUDaS99xhEqFmDNRQVpipGhWf",
+						programId: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+					});
+					console.log(tx.transaction.message.instructions);
+					//  tx.transaction.message.instructions.forEach((instruction, n) => {
+					// 		console.log(
+					// 			`---Instructions ${n + 1}: ${instruction.programId.toString()}`
+					// 		);
+					// 	});
+					// const analysis = analyzeSolanaTransaction(tx);
+					// console.log(formatTransactionAnalysis(analysis));
+					// console.log(parseAndPrintTx(tx), "TX");
+					// console.log(tx, "TX");
 					const innerTx = tx.meta && tx.meta.innerInstructions;
 					const postTokenBalances = tx.meta && tx.meta.postTokenBalances;
 					const preTokenBalances = tx.meta && tx.meta.preTokenBalances;
 					const txInstruction = tx.transaction.message.instructions.forEach(
 						(instruction: any) => {}
 					);
-					const signature=tx.transaction.signatures.map((instruction: any) => {})
-					const parsed=analyzeSolanaTransaction(tx)
+					const signature = tx.transaction.signatures.map(
+						(instruction: any) => {}
+					);
+					const parsed = analyzeSolanaTransaction(tx);
 
-console.log(formatTransactionAnalysis(parsed),"PARSEFD")					// console.log(
-					// 	"TX",
-					// 	JSON.stringify(
-					// 		tx,
-					// 		(key, value) => {
-					// 			if (typeof value === "bigint") {
-					// 				return value.toString();
-					// 			}
-					// 			return value;
-					// 		},
-					// 		2
-					// 	)
-					// );
+					//console.log(formatTransactionAnalysis(parsed),"PARSEFD")
+					// console.log(
+					// 		"TX",
+					// 		JSON.stringify(
+					// 			tx,
+					// 			(key, value) => {
+					// 				if (typeof value === "bigint") {
+					// 					return value.toString();
+					// 				}
+					// 				return value;
+					// 			},
+					// 			2
+					// 		)
+					// 	);
 					// console.log(tx.meta?.postTokenBalances)
 					// console.log(tx.meta?.preTokenBalances)
 					// if (tx.meta && tx.meta.postBalances) {
@@ -336,8 +371,8 @@ console.log(formatTransactionAnalysis(parsed),"PARSEFD")					// console.log(
 
 (async () => {
 	const transactions = await getWalletTransactions(
-		"5XwHj9QDqJbZGBiHfJRhoY1qkvqtpERFMPkNDmJNqdmG",
-		1
+		"6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+		2
 	);
 	// console.log(transactions.map((tx) => tx.instructions));
 	// console.log(

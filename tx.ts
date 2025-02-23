@@ -57,11 +57,11 @@ const parseTransaction = async (address: string, retries = 3): Promise<any[]> =>
 
             // Save progress after each successful fetch
             await fs.writeFile(outputPath, JSON.stringify(data, null, 2));
-        } catch (error) {
+        } catch (error:any) {
             console.error(`Failed to fetch ${address}:`, error);
             failed.push({
                 address,
-                error: error?.message,
+                error: error &&error.message,
                 timestamp: new Date().toISOString()
             });
             await fs.writeFile(failedPath, JSON.stringify(failed, null, 2));

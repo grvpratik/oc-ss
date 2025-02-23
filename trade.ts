@@ -1,7 +1,7 @@
 import axios from "axios";
 import fs from "node:fs/promises";
 import path from "node:path";
-import data from "./data/pump-fun-data-4.json" with { type: "json" };
+// import data from "./data/pump-fun-data-4.json" with { type: "json" };
 
 interface FetchAndSaveOptions {
 	pretty?: boolean;
@@ -157,7 +157,7 @@ const fetchWithRetry = async (url, options, retries = MAX_RETRIES) => {
 };
 
 // Modified function with delay
-const fetchData = async (data) => {
+const fetchData = async (data:any) => {
 	for (const coin of data) {
 		try {
 			const ca = coin.mint;
@@ -253,29 +253,29 @@ const fetchData = async (data) => {
 };
 
 //fetchData(data);
-(async()=>{await(await (await (fetch("https://gmgn.ai/defi/quotation/v1/smartmoney/sol/walletNew/2eS2R6Pxi9CHdjYGTjs1VhvAm5B1us7uWV1eF8QWU9x6?device_id=e517c664-3e89-47d4-add0-8eac80bb1e30&client_id=gmgn_web_2025.0127.130032&from_app=gmgn&app_ver=2025.0127.130032&tz_name=Asia%2FCalcutta&tz_offset=19800&app_lang=en&period=7d", {
-	"headers": {
-		"accept": "application/json, text/plain, */*",
-		"accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
-		"if-none-match": "W/\"670-gwHcvVacURT8RL4t+neU7HkwHN0\"",
-		"priority": "u=1, i",
-		"sec-ch-ua": "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
-		"sec-ch-ua-arch": "\"x86\"",
-		"sec-ch-ua-bitness": "\"64\"",
-		"sec-ch-ua-full-version": "\"131.0.6778.265\"",
-		"sec-ch-ua-full-version-list": "\"Google Chrome\";v=\"131.0.6778.265\", \"Chromium\";v=\"131.0.6778.265\", \"Not_A Brand\";v=\"24.0.0.0\"",
-		"sec-ch-ua-mobile": "?0",
-		"sec-ch-ua-model": "\"\"",
-		"sec-ch-ua-platform": "\"Windows\"",
-		"sec-ch-ua-platform-version": "\"19.0.0\"",
-		"sec-fetch-dest": "empty",
-		"sec-fetch-mode": "cors",
-		"sec-fetch-site": "same-origin"
-	},
-	"referrer": "https://gmgn.ai/sol/address/2eS2R6Pxi9CHdjYGTjs1VhvAm5B1us7uWV1eF8QWU9x6",
-	"referrerPolicy": "same-origin",
-	"body": null,
-	"method": "GET",
-	"mode": "cors",
-	"credentials": "include"
-}))).json())})()
+// (async()=>{await(await (await (fetch("https://gmgn.ai/defi/quotation/v1/smartmoney/sol/walletNew/2eS2R6Pxi9CHdjYGTjs1VhvAm5B1us7uWV1eF8QWU9x6?device_id=e517c664-3e89-47d4-add0-8eac80bb1e30&client_id=gmgn_web_2025.0127.130032&from_app=gmgn&app_ver=2025.0127.130032&tz_name=Asia%2FCalcutta&tz_offset=19800&app_lang=en&period=7d", {
+// 	"headers": {
+// 		"accept": "application/json, text/plain, */*",
+// 		"accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+// 		"if-none-match": "W/\"670-gwHcvVacURT8RL4t+neU7HkwHN0\"",
+// 		"priority": "u=1, i",
+// 		"sec-ch-ua": "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+// 		"sec-ch-ua-arch": "\"x86\"",
+// 		"sec-ch-ua-bitness": "\"64\"",
+// 		"sec-ch-ua-full-version": "\"131.0.6778.265\"",
+// 		"sec-ch-ua-full-version-list": "\"Google Chrome\";v=\"131.0.6778.265\", \"Chromium\";v=\"131.0.6778.265\", \"Not_A Brand\";v=\"24.0.0.0\"",
+// 		"sec-ch-ua-mobile": "?0",
+// 		"sec-ch-ua-model": "\"\"",
+// 		"sec-ch-ua-platform": "\"Windows\"",
+// 		"sec-ch-ua-platform-version": "\"19.0.0\"",
+// 		"sec-fetch-dest": "empty",
+// 		"sec-fetch-mode": "cors",
+// 		"sec-fetch-site": "same-origin"
+// 	},
+// 	"referrer": "https://gmgn.ai/sol/address/2eS2R6Pxi9CHdjYGTjs1VhvAm5B1us7uWV1eF8QWU9x6",
+// 	"referrerPolicy": "same-origin",
+// 	"body": null,
+// 	"method": "GET",
+// 	"mode": "cors",
+// 	"credentials": "include"
+// }))).json())})()

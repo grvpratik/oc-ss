@@ -11,20 +11,20 @@ ws.on('open', function open() {
   ws.send(JSON.stringify(payload));
 
   // Subscribing to trades made by accounts
-  payload = {
-      method: "subscribeAccountTrade",
-      keys: ["AArPXm8JatJiuyEffuC1un2Sc835SULa4uQqDcaGpAjV"] // array of accounts to watch
-    }
-  ws.send(JSON.stringify(payload));
+  // payload= {
+  //     method: "subscribeAccountTrade",
+  //     keys: ["AArPXm8JatJiuyEffuC1un2Sc835SULa4uQqDcaGpAjV"] // array of accounts to watch
+  //   }
+  // ws.send(JSON.stringify(payload));
 
-  // Subscribing to trades on tokens
-  payload = {
-      method: "subscribeTokenTrade",
-      keys: ["91WNez8D22NwBssQbkzjy4s2ipFrzpmn5hfvWVe2aY5p"] // array of token CAs to watch
-    }
-  ws.send(JSON.stringify(payload));
+  // // Subscribing to trades on tokens
+  // payload = {
+  //     method: "subscribeTokenTrade",
+  //     keys: ["91WNez8D22NwBssQbkzjy4s2ipFrzpmn5hfvWVe2aY5p"] // array of token CAs to watch
+  //   }
+  // ws.send(JSON.stringify(payload));
 });
 
 ws.on('message', function message(data) {
-  console.log(JSON.parse(data));
+  console.log(JSON.parse(data.toString()));
 });

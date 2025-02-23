@@ -242,3 +242,170 @@ export function extractTransactionDetails(transaction: any) {
 		bundled,
 	};
 }
+
+
+
+export const parseSolanaTransaction = (txData:any) => {
+	// Initialize holders for different types of instructions
+	const result :any= {
+		timestamp: parseInt(txData.blockTime),
+		status: txData.meta.status.Ok === null ? "success" : "failed",
+		fee: parseInt(txData.meta.fee),
+		computeUnits: parseInt(txData.meta.computeUnitsConsumed),
+
+		// Token transfers
+		tokenTransfers: [],
+
+		// SOL transfers
+		solTransfers: [],
+
+		// Account creations
+		accountCreations: [],
+
+		// Program invocations grouped by program
+		programInvocations: {},
+
+		// Token balances changes
+		tokenBalanceChanges: [],
+	};
+
+	// Helper to get account name/type
+	const getAccountType = (account:any) => {
+		if (account.signer) return "signer";
+		if (account.programId === "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+			return "token";
+		if (account.programId === "11111111111111111111111111111111")
+			return "system";
+		return "other";
+	};
+
+	// Process pre/post token balances
+	const preBalances = new Map();
+	const postBalances = new Map();
+
+	txData.meta.preTokenBalances.forEach((balance:any) => {
+		preBalances.set(balance.accountIndex, balance);
+	});
+
+	txData.meta.postTokenBalances.forEach((balance:any) => {
+		postBalances.set(balance.accountIndex, balance);
+	});
+
+	// Process token balance changes
+	for (const [accountIndex, postBalance] of postBalances) {
+		const preBalance = preBalances.get(accountIndex);
+		if (preBalance) {
+			const change = {
+				account: txData.transaction.message.accountKeys[accountIndex].pubkey,
+				mint: postBalance.mint,
+				owner: postBalance.owner,
+				preBalance: preBalance.uiTokenAmount.uiAmount,
+				postBalance: postBalance.uiTokenAmount.uiAmount,
+				change:
+					postBalance.uiTokenAmount.uiAmount -
+					preBalance.uiTokenAmount.uiAmount,
+			};
+			result.tokenBalanceChanges.push(change);
+		}
+	}
+
+	// Process inner instructions
+	txData.meta.innerInstructions.forEach((inner:any) => {
+		inner.instructions.forEach((ix:any) => {
+			if (ix.program === "spl-token" && ix.parsed.type === "transfer") {
+				result.tokenTransfers.push({
+					amount: parseFloat(ix.parsed.info.amount),
+					from: ix.parsed.info.source,
+					to: ix.parsed.info.destination,
+					authority: ix.parsed.info.authority,
+				});
+			}
+
+			if (ix.program === "system" && ix.parsed.type === "transfer") {
+				result.solTransfers.push({
+					amount: parseFloat(ix.parsed.info.lamports) / 1e9, // Convert to SOL
+					from: ix.parsed.info.source,
+					to: ix.parsed.info.destination,
+				});
+			}
+
+			if (ix.program === "system" && ix.parsed.type === "createAccount") {
+				result.accountCreations.push({
+					newAccount: ix.parsed.info.newAccount,
+					owner: ix.parsed.info.source,
+                    
+					lamports: parseFloat(ix.parsed.info.lamports) / 1e9,
+					space: parseInt(ix.parsed.info.space),
+				});
+			}
+
+			// Group by program
+			if (!result.programInvocations[ix.program]) {
+				result.programInvocations[ix.program] = [];
+			}
+			result.programInvocations[ix.program].push({
+				type:ix.parsed && ix.parsed.type || "unknown",
+				info:ix.parsed && ix.parsed.info || {},
+			});
+		});
+	});
+
+	return result;
+};
+
+// Example usage:
+export const parseAndPrintTx = (txData:any) => {
+	const parsed :any= parseSolanaTransaction(txData);
+
+	console.log("Transaction Summary:");
+	console.log("==================");
+	console.log(`Timestamp: ${new Date(parsed.timestamp * 1000).toISOString()}`);
+	console.log(`Status: ${parsed.status}`);
+	console.log(`Fee: ${parsed.fee} lamports`);
+	console.log(`Compute Units: ${parsed.computeUnits}`);
+
+	console.log("\nToken Transfers:");
+	console.log("===============");
+	parsed.tokenTransfers.forEach((transfer:any) => {
+		console.log(
+			`${transfer.amount} tokens from ${transfer.from} to ${transfer.to}`
+		);
+	});
+
+	console.log("\nSOL Transfers:");
+	console.log("=============");
+	parsed.solTransfers.forEach((transfer:any) => {
+		console.log(
+			`${transfer.amount} SOL from ${transfer.from} to ${transfer.to}`
+		);
+	});
+
+	console.log("\nAccount Creations:");
+	console.log("=================");
+	parsed.accountCreations.forEach((creation:any) => {
+		console.log(
+			`Created account ${creation.newAccount} owned by ${creation.owner}`
+		);
+	});
+
+	console.log("\nToken Balance Changes:");
+	console.log("====================");
+	parsed.tokenBalanceChanges.forEach((change:any) => {
+		console.log(`Account ${change.account} (owned by ${change.owner})`);
+		console.log(`  Pre: ${change.preBalance}`);
+		console.log(`  Post: ${change.postBalance}`);
+		console.log(`  Change: ${change.change}`);
+	});
+
+	console.log("\nProgram Invocations:");
+	console.log("==================");
+	Object.entries(parsed.programInvocations).forEach(
+		([program, invocations]:any) => {
+			console.log(`\n${program}:`);
+			invocations.forEach((ix:any) => {
+				console.log(`  ${ix.type}`);
+			});
+		}
+	);
+};
+

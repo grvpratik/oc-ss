@@ -13,7 +13,7 @@ ws.on("open", () => {
   console.log("initialized connection");
 });
 
-ws.on("message", (data) => {
+ws.on("message", (data:any) => {
   // convert buffer to string
   const message = data.toString();
 
