@@ -11,10 +11,11 @@ const twitterClient = new TwitterApi({
 
 const readOnlyClient = twitterClient.readOnly;
 
-// (async () => {
-// 	//const user = await readOnlyClient.v2.userByUsername('plhery');
-// 	//console.log(user)
-// 	await twitterClient.v2.tweet("Hello, this is a test. 2");
+(async () => {
+	const user = await readOnlyClient.v2.userByUsername('plhery');
+	const list= await readOnlyClient.v2.search('lol')
+	console.log(list)
+	//await twitterClient.v2.tweet("Hello, this is a test. 2");
 
-// 	console.log("tweet");
-// })();
+	console.log("tweet");
+})();
