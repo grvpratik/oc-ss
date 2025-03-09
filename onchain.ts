@@ -64,7 +64,7 @@ function decodePumpFunInstruction(instruction: {
 	try {
 		// Decode base58 instruction data
 		const decodedData = bs58.decode(instruction.data);
-console.log(decodedData)
+		console.log(decodedData);
 		// First bytes typically represent instruction type
 		const firstByte = decodedData[0];
 
@@ -187,15 +187,15 @@ export async function getWalletTransactions(
 		const slot = signaturesResponse.map((sig) => sig.slot);
 		// Process each transaction
 		// console.log(signaturesResponse);
-
-		const transactions: TransactionDetails[] = await Promise.all(
+let transactions=[]
+		const transactionsx:any= await Promise.all(
 			signaturesResponse.map(async (sig) => {
 				try {
 					// Fetch transaction details using JSON parsed format
 					const txResponse = await rpc
 						.getTransaction(
 							sig.signature ||
-								"iRP2wprvsFBLTANEtdkxS4w8PrbbkRQTSgNuKvBudhkuhhNZ1z2fBhbx4UYBHAZSHD2x9wma7XARomXtMXmVUgB" as Signature,
+								("iRP2wprvsFBLTANEtdkxS4w8PrbbkRQTSgNuKvBudhkuhhNZ1z2fBhbx4UYBHAZSHD2x9wma7XARomXtMXmVUgB" as Signature),
 							{
 								maxSupportedTransactionVersion: 0,
 								encoding: "jsonParsed",
@@ -216,15 +216,154 @@ export async function getWalletTransactions(
 					}
 
 					const tx = txResponse;
+					//console.log(tx.transaction.message.instructions);
+					const parsedInfos: any[] = [];
+					function calculateNativeBalanceChanges(transactionDetails: any) {
+						const meta = tx && tx.meta;
 
+						if (!meta) {
+							console.log("No meta information available");
+							return;
+						}
+
+						const preBalances = meta.preBalances;
+						const postBalances = meta.postBalances;
+
+						if (!preBalances || !postBalances) {
+							console.log("No balance information available");
+							return;
+						}
+
+						const balanceChanges = [];
+
+						// Calculate SOL balance changes for each account
+						for (let i = 0; i < preBalances.length; i++) {
+							const preBalance = Number(preBalances[i]);
+							const postBalance = Number(postBalances[i]);
+							const solDifference = (postBalance! - preBalance!) / 1e9; // Convert lamports to SOL
+
+							if (solDifference !== 0) {
+								balanceChanges.push({
+									accountIndex: i,
+									preBalance: preBalance! / 1e9, // Convert to SOL
+									postBalance: postBalance! / 1e9, // Convert to SOL
+									change: solDifference,
+								});
+							}
+						}
+
+						// Log the results
+						if (balanceChanges.length > 0) {
+							const firstChange = balanceChanges[0];
+							// console.log(`Account Index ${firstChange.accountIndex} native balance change:`);
+							// console.log(`Pre Balance: ${firstChange.preBalance} SOL`);
+							// console.log(`Post Balance: ${firstChange.postBalance} SOL`);
+							// console.log(`Change: ${firstChange.change} SOL`);
+							// console.log('-----------------------------------');
+							const type = firstChange!.change > 0 ? "sell" : "buy";
+							return {
+								type,
+								balanceChange: firstChange!.change,
+							};
+						} else {
+							console.log("No balance changes found");
+							return {
+								type: "",
+								balanceChange: "",
+							};
+						}
+					}
+					//console.log(calculateNativeBalanceChanges([tx]));
+					const nativeBalance = calculateNativeBalanceChanges([tx]);
+					const preBalances = tx?.meta?.preBalances;
+					const postBalances = tx?.meta?.postBalances;
+
+					// Transaction Metadata
+					tx?.meta?.innerInstructions?.forEach((i: any) => {
+						// raydium
+						i.instructions.forEach((r: any) => {
+							if (
+								r.parsed?.type === "transfer" &&
+								r.parsed.info.amount !== undefined
+							) {
+								transactions.push(r.parsed);
+							}
+						});
+					});
+
+					// pumpfun
+					tx?.transaction.message.instructions.map((instruction: any) => {
+						if (
+							transactions.length <= 1 &&
+							instruction &&
+							instruction.parsed !== undefined
+						) {
+							parsedInfos.push(instruction.parsed);
+						}
+					});
+
+					// console.log('transaction', transactions)
+
+					// console.log('native balance', nativeBalance)
+
+					if (!preBalances || !postBalances) {
+						console.log("No balance information available");
+						return;
+					}
+
+					// we have to do this for pumpfun transactions since swap info is not available in its instructions
+					let totalSolSwapped = 0;
+
+					for (let i = 0; i < preBalances.length; i++) {
+						const preBalance = Number(preBalances[i]);
+						const postBalance = Number(postBalances[i]);
+
+						const solDifference = (postBalance! - preBalance!) / 1e9; // Convert lamports to SOL
+
+						if (
+							solDifference < 0 &&
+							i === 1 &&
+							nativeBalance?.type === "sell"
+						) {
+							totalSolSwapped += Math.abs(solDifference);
+						} else if (
+							solDifference < 0 &&
+							i === 2 &&
+							nativeBalance?.type === "sell"
+						) {
+							totalSolSwapped += Math.abs(solDifference);
+						} else if (
+							solDifference < 0 &&
+							i === 5 &&
+							nativeBalance?.type === "sell"
+						) {
+							totalSolSwapped += Math.abs(solDifference);
+						} else if (
+							solDifference !== 0 &&
+							i === 3 &&
+							nativeBalance?.type === "buy"
+						) {
+							totalSolSwapped += Math.abs(solDifference);
+							// In case index 3 doesnt hold the amount
+						} else if (
+							solDifference === 0 &&
+							i === 3 &&
+							nativeBalance?.type === "buy"
+						) {
+							totalSolSwapped = Math.abs(
+								(Number(postBalances[2]!) - Number(preBalances[2]!)) / 1e9
+							);
+						}
+					}
+console.log(parsedInfos)
 					// let instructions = tx.transaction.message.instructions;
 					// const res = instructions.map((ix) => decodePumpFunInstruction(ix.));
-					decodePumpFunInstruction({
-						accounts: [],
-						data: "5jRcjdixRUDaS99xhEqFmDNRQVpipGhWf",
-						programId: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
-					});
-					console.log(tx.transaction.message.instructions);
+					// decodePumpFunInstruction({
+					// 	accounts: [],
+					// 	data: "5jRcjdixRUDaS99xhEqFmDNRQVpipGhWf",
+					// 	programId: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+					// });
+					// console.log(tx.transaction.message.instructions);
 					//  tx.transaction.message.instructions.forEach((instruction, n) => {
 					// 		console.log(
 					// 			`---Instructions ${n + 1}: ${instruction.programId.toString()}`
@@ -362,7 +501,7 @@ export async function getWalletTransactions(
 			})
 		);
 
-		return transactions;
+		return transactionsx;
 	} catch (error) {
 		console.error("Error fetching wallet transactions:", error);
 		throw error;
@@ -372,7 +511,7 @@ export async function getWalletTransactions(
 (async () => {
 	const transactions = await getWalletTransactions(
 		"6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
-		2
+		10
 	);
 	// console.log(transactions.map((tx) => tx.instructions));
 	// console.log(
