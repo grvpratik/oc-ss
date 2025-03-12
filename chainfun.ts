@@ -185,7 +185,7 @@ Wallet Changes:
 	analysis.walletChanges
 		.filter((w) => w.change !== 0 || w.tokenChanges.length > 0)
 		.forEach((wallet) => {
-			output += `\n${wallet.address}:
+			output += `\n${wallet.address} (token account):
   SOL: ${wallet.preSol.toFixed(9)} → ${wallet.postSol.toFixed(9)} (${
 				wallet.change > 0 ? "+" : ""
 			}${wallet.change.toFixed(9)})

@@ -77,6 +77,7 @@ const path = require("path");
 
 async function Betalist() {
 	const browser = await puppeteer.launch({
+		headless:false,
 		executablePath: "/usr/bin/chromium-browser",
 		args: [
 			"--no-sandbox",
@@ -88,49 +89,55 @@ async function Betalist() {
 	try {
 		const page = await browser.newPage();
 
-		await page.goto("https://betalist.com/topics/ai-tools", {
-			waitUntil: "networkidle0",
-			timeout: 60000,
-		});
-
-		// Extract data using page.evaluate
-		const products = await page.evaluate(() => {
-			const parentDiv = document.getElementById("content");
-
-			if (!parentDiv) {
-				return [];
+		await page.goto(
+			"https://lens.google.com/uploadbyurl?url=https://pump.mypinata.cloud/ipfs/QmTAQ4RzZxL9vRYJVyPcoP3vWWiotTwrMzcKgzKRELLuqE",
+			{
+				waitUntil: "networkidle0",
+				timeout: 60000,
 			}
+		);
+await page.screenshot({
+ 			path: path.join( "full_page.png"),
+ 			fullPage: true,
+		});
+		// // Extract data using page.evaluate
+		// const products = await page.evaluate(() => {
+		// 	const parentDiv = document.getElementById("content");
 
-			// This example shows multiple ways to select list items
-			const items = parentDiv.querySelectorAll("#content > div ");
+		// 	if (!parentDiv) {
+		// 		return [];
+		// 	}
 
-			return Array.from(items).map((item) => {
-				return {
-					// Extract text content
-					title: item
-						.querySelector("#content >div >div>div>div>a")
-						.textContent.trim(), //item.textContent.trim()
+		// 	// This example shows multiple ways to select list items
+		// 	const items = parentDiv.querySelectorAll("#content > div ");
 
-					// Extract href if it's a link
-					link: item.querySelector("#content >div>a")?.href || null,
+		// 	return Array.from(items).map((item) => {
+		// 		return {
+		// 			// Extract text content
+		// 			title: item
+		// 				.querySelector("#content >div >div>div>div>a")
+		// 				.textContent.trim(), //item.textContent.trim()
 
-					// Extract any data attributes
-					dataId: item.getAttribute("id"),
+		// 			// Extract href if it's a link
+		// 			link: item.querySelector("#content >div>a")?.href || null,
+
+		// 			// Extract any data attributes
+		// 			dataId: item.getAttribute("id"),
 
 					
 					
-					description:
-						item.querySelector("#content >div >div>div>a")?.textContent.trim() ||
-						null,
+		// 			description:
+		// 				item.querySelector("#content >div >div>div>a")?.textContent.trim() ||
+		// 				null,
 
-					// Extract any images
-					imageUrl: item.querySelector("img")?.src || null,
-				};
-			});
-		}); 
+		// 			// Extract any images
+		// 			imageUrl: item.querySelector("img")?.src || null,
+		// 		};
+		// 	});
+		// }); 
 
-		console.log(JSON.stringify(products, null, 2));
-		return products;
+		// console.log(JSON.stringify(products, null, 2));
+		// return products;
 	} catch (error) {
 		console.error("Error details:", {
 			message: error.message,

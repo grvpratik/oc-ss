@@ -56,69 +56,69 @@ interface DecodedPumpFunData {
 /**
  * Decode PumpFun transaction data
  */
-function decodePumpFunInstruction(instruction: {
-	accounts: string[];
-	data: string;
-	programId: string;
-}): DecodedPumpFunData {
-	try {
-		// Decode base58 instruction data
-		const decodedData = bs58.decode(instruction.data);
-		console.log(decodedData);
-		// First bytes typically represent instruction type
-		const firstByte = decodedData[0];
+// function decodePumpFunInstruction(instruction: {
+// 	accounts: string[];
+// 	data: string;
+// 	programId: string;
+// }): DecodedPumpFunData {
+// 	try {
+// 		// Decode base58 instruction data
+// 		const decodedData = bs58.decode(instruction.data);
+// 		console.log(decodedData);
+// 		// First bytes typically represent instruction type
+// 		const firstByte = decodedData[0];
 
-		// Map accounts to meaningful names
-		const userWallet = instruction.accounts[0]; // Often the first account is user wallet
-		const tokenMint = instruction.accounts[1]; // Often second account is token mint
-		const pumpfunEscrow = instruction.accounts[2]; // Often PumpFun protocol account
+// 		// Map accounts to meaningful names
+// 		const userWallet = instruction.accounts[0]; // Often the first account is user wallet
+// 		const tokenMint = instruction.accounts[1]; // Often second account is token mint
+// 		const pumpfunEscrow = instruction.accounts[2]; // Often PumpFun protocol account
 
-		// Attempt to determine instruction type based on first byte and accounts pattern
-		let instructionType = "Unknown PumpFun Operation";
+// 		// Attempt to determine instruction type based on first byte and accounts pattern
+// 		let instructionType = "Unknown PumpFun Operation";
 
-		if (firstByte === 0 || firstByte === 1) {
-			instructionType = "Buy Token";
-		} else if (firstByte === 2 || firstByte === 3) {
-			instructionType = "Sell Token";
-		} else if (firstByte === 4) {
-			instructionType = "Create Token";
-		} else if (firstByte === 5) {
-			instructionType = "Claim Rewards";
-		}
+// 		if (firstByte === 0 || firstByte === 1) {
+// 			instructionType = "Buy Token";
+// 		} else if (firstByte === 2 || firstByte === 3) {
+// 			instructionType = "Sell Token";
+// 		} else if (firstByte === 4) {
+// 			instructionType = "Create Token";
+// 		} else if (firstByte === 5) {
+// 			instructionType = "Claim Rewards";
+// 		}
 
-		// Extract any token name if available (typically in later bytes)
-		let tokenName = "";
-		if (decodedData.length > 8) {
-			// Skip instruction discriminator (typically 8 bytes)
-			// This is a simplification - actual format depends on PumpFun's specific protocol
-			const possibleTextBytes = decodedData.slice(8);
-			try {
-				// Attempt to decode any text data
-				tokenName = new TextDecoder()
-					.decode(
-						possibleTextBytes.filter((b: any) => b >= 32 && b < 127) // Filter for printable ASCII
-					)
-					.trim();
-			} catch (e) {
-				// Text decoding failed
-			}
-		}
-		console.log(instructionType, tokenName, tokenMint, userWallet);
+// 		// Extract any token name if available (typically in later bytes)
+// 		let tokenName = "";
+// 		if (decodedData.length > 8) {
+// 			// Skip instruction discriminator (typically 8 bytes)
+// 			// This is a simplification - actual format depends on PumpFun's specific protocol
+// 			const possibleTextBytes = decodedData.slice(8);
+// 			try {
+// 				// Attempt to decode any text data
+// 				tokenName = new TextDecoder()
+// 					.decode(
+// 						possibleTextBytes.filter((b: any) => b >= 32 && b < 127) // Filter for printable ASCII
+// 					)
+// 					.trim();
+// 			} catch (e) {
+// 				// Text decoding failed
+// 			}
+// 		}
+// 		console.log(instructionType, tokenName, tokenMint, userWallet);
 
-		return {
-			instructionType,
-			tokenName: tokenName || undefined,
-			tokenMint: tokenMint,
-			sender: userWallet,
-			// Add more details as needed
-		};
-	} catch (error) {
-		console.error("Error decoding PumpFun instruction:", error);
-		return {
-			instructionType: "Failed to decode",
-		};
-	}
-}
+// 		return {
+// 			instructionType,
+// 			tokenName: tokenName || undefined,
+// 			tokenMint: tokenMint,
+// 			sender: userWallet,
+// 			// Add more details as needed
+// 		};
+// 	} catch (error) {
+// 		console.error("Error decoding PumpFun instruction:", error);
+// 		return {
+// 			instructionType: "Failed to decode",
+// 		};
+// 	}
+// }
 
 /**
  * Function to get human-readable account roles
@@ -187,15 +187,15 @@ export async function getWalletTransactions(
 		const slot = signaturesResponse.map((sig) => sig.slot);
 		// Process each transaction
 		// console.log(signaturesResponse);
-let transactions=[]
-		const transactionsx:any= await Promise.all(
+		let transactions = [];
+		const transactionsx: any = await Promise.all(
 			signaturesResponse.map(async (sig) => {
 				try {
 					// Fetch transaction details using JSON parsed format
 					const txResponse = await rpc
 						.getTransaction(
-							sig.signature ||
-								("iRP2wprvsFBLTANEtdkxS4w8PrbbkRQTSgNuKvBudhkuhhNZ1z2fBhbx4UYBHAZSHD2x9wma7XARomXtMXmVUgB" as Signature),
+							sig.signature ,
+							
 							{
 								maxSupportedTransactionVersion: 0,
 								encoding: "jsonParsed",
@@ -355,7 +355,7 @@ let transactions=[]
 							);
 						}
 					}
-console.log(parsedInfos)
+					console.log(parsedInfos);
 					// let instructions = tx.transaction.message.instructions;
 					// const res = instructions.map((ix) => decodePumpFunInstruction(ix.));
 					// decodePumpFunInstruction({
@@ -511,7 +511,7 @@ console.log(parsedInfos)
 (async () => {
 	const transactions = await getWalletTransactions(
 		"6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
-		10
+		1
 	);
 	// console.log(transactions.map((tx) => tx.instructions));
 	// console.log(
