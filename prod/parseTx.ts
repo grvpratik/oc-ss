@@ -14,6 +14,7 @@ import {
 	parseAndPrintTx,
 	parseSolanaTransaction,
 } from "../chainfun";
+import { analyzeSolanaTransactionEnhanced, demonstrateTransactionAnalysis } from "./extractTx";
 
 interface TokenBalance {
 	tokenMint: string;
@@ -111,17 +112,14 @@ async function parseTx(sig: Signature) {
 }
 (async () => {
 	const res = await getWalletTransactions(
-		"6UY5Rz8U784hnn75wVCy9Uz5NqB6SftJo2bVcWRmC5Zm" as Address,
-		2
+		"ZG98FUCjb8mJ824Gbs6RsgVmr1FhXb2oNiJHa2dwmPd" as Address,
+		1
 	);
 
 	res.forEach(async (sig) => {
 		let data = await parseTx(sig.signature);
-		const res = await analyzeSolanaTransaction(data);
-		console.log(await formatTransactionAnalysis(res));
-		await parseAndPrintTx(data);
-		// console.log(extractTransactionDetails(data))
-		// console.log(parseSolanaTransaction(data))
+		const res=await analyzeSolanaTransactionEnhanced(data)
+		console.log(res)
 		//console.log(data)
 	});
 })();

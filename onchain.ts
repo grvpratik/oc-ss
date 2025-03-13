@@ -165,7 +165,7 @@ export async function getWalletTransactions(
 	walletAddress: string,
 	limit: number = 10
 ) {
-	console.log(process.env.HELIUS_API_KEY);
+	//console.log(process.env.HELIUS_API_KEY);
 	// Create RPC connection
 	const rpc = createSolanaRpc(
 		`https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`
@@ -187,7 +187,7 @@ export async function getWalletTransactions(
 		const slot = signaturesResponse.map((sig) => sig.slot);
 		// Process each transaction
 		// console.log(signaturesResponse);
-		let transactions = [];
+		let transactions: any[] = [];
 		const transactionsx: any = await Promise.all(
 			signaturesResponse.map(async (sig) => {
 				try {
@@ -220,7 +220,7 @@ export async function getWalletTransactions(
 					const parsedInfos: any[] = [];
 					function calculateNativeBalanceChanges(transactionDetails: any) {
 						const meta = tx && tx.meta;
-
+						
 						if (!meta) {
 							console.log("No meta information available");
 							return;
@@ -277,7 +277,7 @@ export async function getWalletTransactions(
 					const nativeBalance = calculateNativeBalanceChanges([tx]);
 					const preBalances = tx?.meta?.preBalances;
 					const postBalances = tx?.meta?.postBalances;
-
+					
 					// Transaction Metadata
 					tx?.meta?.innerInstructions?.forEach((i: any) => {
 						// raydium
@@ -290,7 +290,7 @@ export async function getWalletTransactions(
 							}
 						});
 					});
-
+					
 					// pumpfun
 					tx?.transaction.message.instructions.map((instruction: any) => {
 						if (
@@ -317,7 +317,7 @@ export async function getWalletTransactions(
 					for (let i = 0; i < preBalances.length; i++) {
 						const preBalance = Number(preBalances[i]);
 						const postBalance = Number(postBalances[i]);
-
+						
 						const solDifference = (postBalance! - preBalance!) / 1e9; // Convert lamports to SOL
 
 						if (
@@ -356,6 +356,7 @@ export async function getWalletTransactions(
 						}
 					}
 					console.log(parsedInfos);
+					console.log(transactions)
 					// let instructions = tx.transaction.message.instructions;
 					// const res = instructions.map((ix) => decodePumpFunInstruction(ix.));
 					// decodePumpFunInstruction({
@@ -510,8 +511,8 @@ export async function getWalletTransactions(
 
 (async () => {
 	const transactions = await getWalletTransactions(
-		"6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
-		1
+		"Bjz1c9jMSqa1U8KM6dZnJJQgFSnX7zV2nr8v3NBeWHKG",
+		5
 	);
 	// console.log(transactions.map((tx) => tx.instructions));
 	// console.log(
